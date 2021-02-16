@@ -1,4 +1,4 @@
-function [traj, vels, times] =harddisk(Lx, Ly, N, sigma, T)
+function [traj_s, vels_s, times_s, traj_d, vels_d, times_d] =harddisk_single(Lx, Ly, N, sigma, T)
 % simulates Monte-Carlo dynamis of a hard disk gas in a periodic system.
 %
 % for Reference, see:
@@ -43,11 +43,13 @@ for k=2:N
     end
 end
 
+X = single(X);
+
 theta = 2*pi*rand(1,N);
 v0 = .1;
 V = zeros(2,N);
-V(1,:) = v0 * cos(theta);
-V(2,:) = v0 * sin(theta);
+V(1,:) = single(v0 * cos(theta));
+V(2,:) = single(v0 * sin(theta));
 
 
 % test plot initial contions
@@ -158,18 +160,30 @@ set(gcf, 'color', 'w')
 
     
 
-    traj = zeros(2,N,Nt);
-    vels = zeros(2,N,Nt);
-    times = zeros(Nt,1);
+    traj_s = zeros(2,N,Nt);
+    vels_s = zeros(2,N,Nt);
+    times_s = zeros(Nt,1);
     
-    traj(:,:,1) = X(:,:);
-    vels(:,:,1) = V(:,:);
+    traj_d = zeros(2,N,Nt);
+    vels_d = zeros(2,N,Nt);
+    times_d = zeros(Nt,1);
+    
+    traj_s(:,:,1) = single(X(:,:));
+    vels_s(:,:,1) = single(V(:,:));
+    
+    traj_d(:,:,1) = double(X(:,:));
+    vels_d(:,:,1) = double(V(:,:));
     tic
     for t=2:Nt
-        [Xn, Vn, tn] = update(squeeze(traj(:,:,t-1)), squeeze(vels(:,:,t-1)), times(t-1));
-        traj(:,:,t) = Xn(:,:);
-        vels(:,:,t) = Vn(:,:);
-        times(t) = tn;
+        [Xn, Vn, tn] = update(squeeze(traj_s(:,:,t-1)), squeeze(vels_s(:,:,t-1)), times_s(t-1));
+        traj_s(:,:,t) = single(Xn(:,:));
+        vels_s(:,:,t) = single(Vn(:,:));
+        times_s(t) = single(tn);
+        
+        [Xn, Vn, tn] = update(squeeze(traj_d(:,:,t-1)), squeeze(vels_d(:,:,t-1)), times_d(t-1));
+        traj_d(:,:,t) = double(Xn(:,:));
+        vels_d(:,:,t) = double(Vn(:,:));
+        times_d(t) = double(tn);
     end
     toc
     
